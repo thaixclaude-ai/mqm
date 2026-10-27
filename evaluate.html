@@ -33,13 +33,21 @@ input:focus, textarea:focus { outline: none; border-color: var(--navy); box-shad
 .chip.on { background: var(--navy); border-color: var(--navy); color: #fff; }
 .chip.sm { padding: 6px 11px; font-size: 13px; font-weight: 600; }
 .chip.sm.on { background: var(--ink); border-color: var(--ink); }
+.chip .cnt { font-weight: 600; opacity: .65; margin-left: 4px; font-size: 12px; }
 .btn { border: 0; background: var(--navy); color: #fff; font: inherit; font-weight: 800; font-size: 16px; padding: 14px 22px; border-radius: 14px; cursor: pointer; }
 .btn:disabled { opacity: .45; }
 .btn.full { width: 100%; }
+.btn.ghost { background: #fff; color: var(--ink); border: 1.5px solid var(--line); }
+.btn.sm { font-size: 13px; padding: 7px 12px; border-radius: 10px; }
+.bhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 12px 0 8px; }
+.bhead b { font-size: 13px; color: var(--muted); letter-spacing: .04em; }
+.ball { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #eef1f7; border-radius: 14px; padding: 10px 12px; }
+.ball span { font-size: 13.5px; }
 .tools { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
 .tools input { flex: 1; padding: 10px 14px; }
-.stat { font-size: 13px; color: var(--muted); margin: 0 2px 10px; }
+.stat { font-size: 13px; color: var(--muted); margin: 0 2px 10px; display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
 .stat b { color: var(--ink); }
+.linkbtn { background: none; border: 0; color: var(--navy); font: inherit; font-weight: 800; font-size: 13px; cursor: pointer; padding: 0; text-decoration: underline; }
 .sample { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; background: #fff; border-radius: 16px; padding: 10px; margin-bottom: 8px;
   box-shadow: 0 1px 2px rgba(0,0,0,.04); border: 1.5px solid transparent; cursor: pointer; width: 100%; text-align: left; font: inherit; color: inherit; }
 .sample:active { border-color: var(--navy); }
@@ -52,6 +60,7 @@ input:focus, textarea:focus { outline: none; border-color: var(--navy); box-shad
 .tag { display: inline-block; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #eef1f7; color: var(--navy); }
 .tag.comp { background: #f4ecf8; color: #6d2f8e; }
 .tag.ok { background: var(--g-soft); color: var(--g); }
+.note { background: #fff8e6; border: 1.5px solid #f3d27a; font-size: 13.5px; }
 .head { display: flex; gap: 14px; align-items: center; }
 .head .th { width: 84px; height: 84px; border-radius: 14px; background: #eeece8 center/cover; flex: none; }
 .head .id { font-weight: 800; color: var(--red); font-size: 13px; }
@@ -88,18 +97,22 @@ input:focus, textarea:focus { outline: none; border-color: var(--navy); box-shad
 <div class="bar" id="bar" hidden></div>
 <div class="toast" id="toast"></div>
 <script>
-// MQM 1A · App đánh giá mẫu. Nhập tên + bộ phận → chọn mẫu đã đăng ký → chấm 4 mục + điểm MQM.
+// MQM 1A · App đánh giá mẫu. Nhập tên + bộ phận → chọn brand mình phụ trách → chọn mẫu → chấm theo bộ câu hỏi của bộ phận.
 // Dữ liệu ghi vào Google Sheet "MQM 1A - Đánh giá mẫu" qua Apps Script (Api.gs), gọi không kèm tài khoản Google.
 const API = 'https://script.google.com/macros/s/AKfycbySru5DIg7ESEnY11NISONQL9-uEPIaCzUIAil84mjowOEKeoO5jmV0GbDWkrR9rRp2/exec';
 const KEY = 'al3b14cjxhewyk';
-const DEPTS = ['PI', 'MKT', 'Design', 'R&D', 'FQS', 'QA', 'Khác'];
-const ATTRS = [
-  ['pkg', 'Package', 'Bao bì', ['Leaking', 'Less air', 'Wrinkled', 'Seal yếu', 'In lệch / mờ', 'Rách', 'Code date mờ']],
-  ['app', 'Appearance', 'Ngoại quan', ['Broken', 'Small pieces', 'Peel off', 'Black spot', 'Dark / burnt', 'Bright / pale', 'Deformed', 'Melting', 'Bloom', 'Coating không đều']],
-  ['tex', 'Texture', 'Kết cấu', ['Dry', 'Hard', 'Pasty', 'Dense', 'Crumble', 'Soft / moisture', 'Starchy', 'Sticky teeth']],
-  ['fla', 'Flavor', 'Hương vị', ['Weak flavor', 'Off flavor', 'Bitter', 'Too sweet', 'Rancid / oily', 'Burnt', 'Sour / spoiled', 'Strong alcohol']],
-];
-const SCORES = ['pkg', 'app', 'tex', 'fla', 'mqm'];
+const DEPTS = ['FQS', 'R&D', 'MKT', 'PI', 'Design'];
+// Bộ câu hỏi theo bộ phận: FQS / R&D / MKT dùng chung bộ "std"; PI / Design chờ anh Thái gửi bộ câu hỏi riêng (null = chưa có)
+const QSET_OF = { FQS: 'std', 'R&D': 'std', MKT: 'std', PI: 'piDesign', Design: 'piDesign' };
+const QSETS = {
+  std: [
+    ['pkg', 'Package', 'Bao bì', ['Leaking', 'Less air', 'Wrinkled', 'Seal yếu', 'In lệch / mờ', 'Rách', 'Code date mờ']],
+    ['app', 'Appearance', 'Ngoại quan', ['Broken', 'Small pieces', 'Peel off', 'Black spot', 'Dark / burnt', 'Bright / pale', 'Deformed', 'Melting', 'Bloom', 'Coating không đều']],
+    ['tex', 'Texture', 'Kết cấu', ['Dry', 'Hard', 'Pasty', 'Dense', 'Crumble', 'Soft / moisture', 'Starchy', 'Sticky teeth']],
+    ['fla', 'Flavor', 'Hương vị', ['Weak flavor', 'Off flavor', 'Bitter', 'Too sweet', 'Rancid / oily', 'Burnt', 'Sour / spoiled', 'Strong alcohol']],
+  ],
+  piDesign: null,
+};
 const BRAND_SVG = '<svg viewBox="0 0 46 30" fill="#fff"><ellipse cx="13" cy="15" rx="12" ry="13"/><ellipse cx="33" cy="15" rx="12" ry="13"/><circle cx="16" cy="12" r="4" fill="#1f3864"/><circle cx="36" cy="12" r="4" fill="#1f3864"/></svg>';
 
 const $ = s => document.querySelector(s);
@@ -112,49 +125,80 @@ const api = {
   post: (name, data) => fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ api: name, k: KEY, data }) }).then(r => r.json()),
 };
-let me = (() => { try { return JSON.parse(localStorage.getItem('mqm1a-me')) || null; } catch (e) { return null; } })();
+// me = {name, dept, brands}; brands là 'all' (gồm cả brand đăng ký sau) hoặc danh sách brand phụ trách
+let me = (() => { try { const v = JSON.parse(localStorage.getItem('mqm1a-me')); return v && DEPTS.includes(v.dept) ? v : null; } catch (e) { return null; } })();
 const setMe = v => { me = v; try { v ? localStorage.setItem('mqm1a-me', JSON.stringify(v)) : localStorage.removeItem('mqm1a-me'); } catch (e) {} };
 
 let samples = [], evals = [], loaded = false, view = 'list', cur = null, ev = null, filt = { show: 'todo', q: '' };
+let draft = { name: me ? me.name : '', dept: me ? me.dept : '', brands: me ? me.brands : [] };   // đang nhập ở màn hình đầu / đổi brand
 const doneBy = id => evals.filter(e => e.sampleId === id);
 const mine = id => me && evals.some(e => e.sampleId === id && String(e.name).toLowerCase() === me.name.toLowerCase());
+const qset = () => QSETS[QSET_OF[me.dept]];
+// Brand có trong các mẫu đã đăng ký, chia ORION / đối thủ, kèm số mẫu
+function brandGroups() {
+  const m = {};
+  samples.forEach(s => { const o = s.origin === 'ORION' ? 'ORION' : 'Đối thủ'; (m[o] = m[o] || {})[s.brand] = ((m[o] || {})[s.brand] || 0) + 1; });
+  return ['ORION', 'Đối thủ'].filter(o => m[o]).map(o => [o, Object.entries(m[o]).sort((a, b) => a[0].localeCompare(b[0]))]);
+}
+const allBrands = () => [...new Set(samples.map(s => s.brand))];
+const covers = (brands, b) => brands === 'all' || (Array.isArray(brands) && brands.includes(b));
+const myBrands = () => me ? me.brands : [];
 
 function hero() {
   const top = `<div class="top"><div class="brand">${BRAND_SVG}MQM · BƯỚC 1A</div>${me ? `<button class="who" id="who">${esc(me.name)} · ${esc(me.dept)} ▾</button>` : ''}</div>`;
-  if (!me) return top + '<h1>Đánh giá mẫu</h1><p>Nhập tên và bộ phận để bắt đầu.</p>';
+  if (!me) return top + '<h1>Đánh giá mẫu</h1><p>Nhập tên, bộ phận và chọn brand mình phụ trách.</p>';
   if (view === 'score' && cur) return top + `<h1 style="font-size:20px"><button class="back" id="back">← Danh sách</button></h1><p>Chấm từng mục từ 1 (tốt) đến 9 (kém).</p>`;
+  if (view === 'brands') return top + '<h1>Brand phụ trách</h1><p>Chỉ mẫu của các brand này hiện trong danh sách của bạn.</p>';
   return top + '<h1>Đánh giá mẫu</h1><p>Chọn mẫu để chấm. Mỗi người chấm độc lập.</p>';
 }
+function brandPicker() {
+  if (!loaded) return '<p class="empty" style="padding:10px">Đang tải danh sách brand…</p>';
+  const groups = brandGroups(), all = draft.brands === 'all';
+  if (!groups.length) return '<p class="hint" style="color:var(--muted);font-size:13px">Chưa có mẫu nào được đăng ký. Có thể chọn "Tất cả brand" để nhận mọi mẫu mới.</p>' +
+    `<div class="ball"><span><b>Tất cả brand</b></span><button class="btn sm ${all ? '' : 'ghost'}" data-all="1">${all ? 'Đã chọn tất cả' : 'Chọn tất cả'}</button></div>`;
+  const n = all ? allBrands().length : draft.brands.length;
+  return `<div class="ball"><span>${all ? '<b>Tất cả brand</b> (gồm cả brand đăng ký sau)' : `Đã chọn <b>${n}</b> / ${allBrands().length} brand`}</span>
+      <button class="btn sm ${all ? '' : 'ghost'}" data-all="1">${all ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}</button></div>
+    ${groups.map(([o, bs]) => `<div class="bhead"><b>${o === 'ORION' ? 'ORION' : 'ĐỐI THỦ'}</b><button class="linkbtn" data-group="${esc(o)}">Chọn cả nhóm</button></div>
+      <div class="chips">${bs.map(([b, c]) => `<button class="chip ${covers(draft.brands, b) ? 'on' : ''}" data-brand="${esc(b)}">${esc(b)}<span class="cnt">${c}</span></button>`).join('')}</div>`).join('')}`;
+}
 function viewLogin() {
-  const d = (me && me.dept) || '';
   return `<div class="card">
-    <div class="field"><span class="label">Họ tên <span class="req">*</span></span><input id="name" autocomplete="name" value="${esc(me ? me.name : '')}" placeholder="VD: Nguyễn Văn A"></div>
-    <div class="field"><span class="label">Bộ phận <span class="req">*</span></span><div class="chips" id="dept">${DEPTS.map(x => `<button class="chip ${d === x ? 'on' : ''}" data-v="${x}">${x}</button>`).join('')}</div></div>
+    <div class="field"><span class="label">Họ tên <span class="req">*</span></span><input id="name" autocomplete="name" value="${esc(draft.name)}" placeholder="VD: Nguyễn Văn A"></div>
+    <div class="field"><span class="label">Bộ phận <span class="req">*</span></span><div class="chips" id="dept">${DEPTS.map(x => `<button class="chip ${draft.dept === x ? 'on' : ''}" data-v="${x}">${x}</button>`).join('')}</div></div>
+    <div class="field"><span class="label">Brand phụ trách <span class="req">*</span></span>${brandPicker()}</div>
     <button class="btn full" id="go">Vào danh sách mẫu</button></div>`;
+}
+function viewBrands() {
+  return `<div class="card">${brandPicker()}</div><button class="btn full" id="saveBrands">Lưu brand phụ trách</button>`;
 }
 function viewList() {
   if (!loaded) return '<div class="card empty">Đang tải danh sách mẫu…</div>';
-  let xs = samples.slice().reverse();
-  const todo = xs.filter(s => !mine(s.id)).length;
+  const pool = samples.filter(s => covers(myBrands(), s.brand)).reverse();
+  let xs = pool;
+  const todo = pool.filter(s => !mine(s.id)).length;
   if (filt.show === 'todo') xs = xs.filter(s => !mine(s.id));
   if (filt.q) { const t = filt.q.toLowerCase(); xs = xs.filter(s => `${s.id} ${s.brand} ${s.flavor} ${s.sku}`.toLowerCase().includes(t)); }
-  return `<div class="tools"><input id="q" placeholder="Tìm mã mẫu, brand, vị…" value="${esc(filt.q)}"><button class="chip ${filt.show === 'todo' ? 'on' : ''}" data-show="todo">Chưa chấm</button><button class="chip ${filt.show === 'all' ? 'on' : ''}" data-show="all">Tất cả</button></div>
-    <p class="stat">Bạn còn <b>${todo}</b> / ${samples.length} mẫu chưa chấm</p>
+  const nb = me.brands === 'all' ? 'Tất cả brand' : `${me.brands.length} brand`;
+  return `${qset() ? '' : `<div class="card note">Bộ câu hỏi cho <b>${esc(me.dept)}</b> đang được cập nhật. Bạn xem được danh sách mẫu nhưng chưa chấm được.</div>`}
+    <div class="tools"><input id="q" placeholder="Tìm mã mẫu, brand, vị…" value="${esc(filt.q)}"><button class="chip ${filt.show === 'todo' ? 'on' : ''}" data-show="todo">Chưa chấm</button><button class="chip ${filt.show === 'all' ? 'on' : ''}" data-show="all">Tất cả</button></div>
+    <div class="stat"><span>Bạn còn <b>${todo}</b> / ${pool.length} mẫu chưa chấm · ${esc(nb)}</span><button class="linkbtn" id="editBrands">Đổi brand phụ trách</button></div>
     ${xs.length ? xs.map(s => { const n = doneBy(s.id).length, m = mine(s.id);
       return `<button class="sample ${m ? 'done' : ''}" data-id="${esc(s.id)}"><div class="th" style="${s.thumb ? `background-image:url(${s.thumb})` : ''}">${s.thumb ? '' : 'không ảnh'}</div>
         <div><span class="id">${esc(s.id)}</span> <span class="tag ${s.origin === 'ORION' ? '' : 'comp'}">${esc(s.origin || '')}</span><b>${esc(s.brand)} · ${esc(s.flavor)}</b><small>${s.sku ? esc(s.sku) + ' · ' : ''}NSX ${dmy(s.mfd)} · ${esc(s.market)}</small></div>
         <div class="st">${m ? '<span class="tag ok">Đã chấm</span>' : ''}<div>${n} người</div></div></button>`; }).join('')
-    : `<div class="card empty">${samples.length ? 'Bạn đã chấm hết mẫu trong danh sách này.' : 'Chưa có mẫu nào được đăng ký.'}</div>`}`;
+    : `<div class="card empty">${!pool.length ? (samples.length ? 'Chưa có mẫu nào thuộc brand bạn phụ trách.' : 'Chưa có mẫu nào được đăng ký.') : 'Bạn đã chấm hết mẫu trong danh sách này.'}</div>`}`;
 }
 function viewScore() {
-  const s = cur, cls = v => v <= 3 ? 'g' : v <= 6 ? 'y' : 'r';
+  const s = cur, cls = v => v <= 3 ? 'g' : v <= 6 ? 'y' : 'r', Q = qset();
   const scale = k => `<div class="scale" data-s="${k}">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(v => `<button class="${cls(v)} ${ev[k] === v ? 'on' : ''}" data-v="${v}">${v}</button>`).join('')}</div>`;
-  return `<div class="card head"><div class="th" style="${s.thumb ? `background-image:url(${s.thumb})` : ''}"></div>
+  const head = `<div class="card head"><div class="th" style="${s.thumb ? `background-image:url(${s.thumb})` : ''}"></div>
       <div><span class="id">${esc(s.id)}</span> <span class="tag ${s.origin === 'ORION' ? '' : 'comp'}">${esc(s.origin || '')}</span><b>${esc(s.brand)} · ${esc(s.flavor)}</b>
-      <small>${s.sku ? esc(s.sku) + ' · ' : ''}NSX ${dmy(s.mfd)} · mua ${dmy(s.buyDate)} · ${esc(s.market)}</small></div></div>
-    ${mine(s.id) ? '<div class="card" style="background:#fff8e6;font-size:13.5px">Bạn đã chấm mẫu này. Lưu lần nữa sẽ thay bản cũ của bạn.</div>' : ''}
+      <small>${s.sku ? esc(s.sku) + ' · ' : ''}NSX ${dmy(s.mfd)} · mua ${dmy(s.buyDate)} · ${esc(s.market)}</small></div></div>`;
+  if (!Q) return head + `<div class="card note">Bộ câu hỏi cho <b>${esc(me.dept)}</b> đang được cập nhật, chưa chấm được mẫu này.</div>`;
+  return head + `${mine(s.id) ? '<div class="card note">Bạn đã chấm mẫu này. Lưu lần nữa sẽ thay bản cũ của bạn.</div>' : ''}
     <div class="legend"><span><i style="background:var(--g)"></i>1–3 tốt</span><span><i style="background:var(--y)"></i>4–6 trung bình</span><span><i style="background:var(--r)"></i>7–9 kém</span></div>
-    ${ATTRS.map(([k, en, vi, tags]) => `<div class="card attr"><h3>${en} <span>${vi}</span></h3>${scale(k)}
+    ${Q.map(([k, en, vi, tags]) => `<div class="card attr"><h3>${en} <span>${vi}</span></h3>${scale(k)}
       <div class="chips" data-t="${k}">${tags.map(t => `<button class="chip sm ${ev.tags[k].includes(t) ? 'on' : ''}">${esc(t)}</button>`).join('')}</div>
       <input data-c="${k}" placeholder="Nhận xét ${vi.toLowerCase()} (nếu có)" value="${esc(ev.c[k])}"></div>`).join('')}
     <div class="card attr"><h3>MQM score <span>Điểm tổng thể cả mẫu</span></h3>${scale('mqm')}
@@ -162,33 +206,64 @@ function viewScore() {
       <span class="label">Đề xuất / ghi chú</span><textarea id="note">${esc(ev.note)}</textarea></div>`;
 }
 function bar() {
-  const b = $('#bar');
-  if (view !== 'score') { b.hidden = true; return; }
-  const n = SCORES.filter(k => ev[k]).length;
+  const b = $('#bar'), Q = view === 'score' && qset();
+  if (!Q) { b.hidden = true; return; }
+  const keys = Q.map(x => x[0]).concat('mqm'), n = keys.filter(k => ev[k]).length;
   b.hidden = false;
-  b.innerHTML = `<div class="in"><div class="prog">Đã chấm ${n}/5 điểm<div class="track"><i style="width:${n * 20}%"></i></div></div><button class="btn" id="save" ${n < 5 ? 'disabled' : ''}>Lưu đánh giá</button></div>`;
+  b.innerHTML = `<div class="in"><div class="prog">Đã chấm ${n}/${keys.length} điểm<div class="track"><i style="width:${n / keys.length * 100}%"></i></div></div><button class="btn" id="save" ${n < keys.length ? 'disabled' : ''}>Lưu đánh giá</button></div>`;
   $('#save').onclick = save;
 }
 function render() {
   $('#hero').innerHTML = hero();
-  $('#app').innerHTML = !me ? viewLogin() : view === 'score' ? viewScore() : viewList();
+  $('#app').innerHTML = !me ? viewLogin() : view === 'score' ? viewScore() : view === 'brands' ? viewBrands() : viewList();
   bar(); bind();
 }
+function bindPicker() {
+  const all = $('[data-all]'); if (all) all.onclick = () => { draft.brands = draft.brands === 'all' ? [] : 'all'; render(); };
+  document.querySelectorAll('[data-group]').forEach(g => g.onclick = () => {
+    const grp = (brandGroups().find(x => x[0] === g.dataset.group) || [, []])[1].map(x => x[0]);
+    const cur = draft.brands === 'all' ? allBrands() : draft.brands;
+    draft.brands = [...new Set(cur.concat(grp))];
+    if (draft.brands.length === allBrands().length) draft.brands = 'all';
+    render();
+  });
+  document.querySelectorAll('[data-brand]').forEach(c => c.onclick = () => {
+    const b = c.dataset.brand, cur = draft.brands === 'all' ? allBrands() : draft.brands.slice();
+    const i = cur.indexOf(b); i >= 0 ? cur.splice(i, 1) : cur.push(b);
+    draft.brands = cur; render();
+  });
+}
 function bind() {
-  const who = $('#who'); if (who) who.onclick = () => { view = 'list'; const keepMe = me; setMe(null); me = null; render(); $('#name').value = keepMe.name; };
+  const who = $('#who'); if (who) who.onclick = () => { draft = { name: me.name, dept: me.dept, brands: me.brands }; view = 'list'; setMe(null); render(); };
   const back = $('#back'); if (back) back.onclick = () => { view = 'list'; render(); scrollTo(0, 0); };
   if (!me) {
-    let dept = '';
-    document.querySelectorAll('#dept button').forEach(b => { if (b.classList.contains('on')) dept = b.dataset.v; b.onclick = () => { dept = b.dataset.v; document.querySelectorAll('#dept button').forEach(x => x.classList.toggle('on', x === b)); }; });
-    $('#go').onclick = () => { const name = $('#name').value.trim(); if (!name || !dept) return toast('Nhập họ tên và chọn bộ phận'); setMe({ name, dept }); render(); };
+    const name = $('#name'); name.oninput = () => { draft.name = name.value; };
+    document.querySelectorAll('#dept button').forEach(b => b.onclick = () => { draft.dept = b.dataset.v; render(); });
+    bindPicker();
+    $('#go').onclick = () => {
+      const nm = draft.name.trim();
+      if (!nm || !draft.dept) return toast('Nhập họ tên và chọn bộ phận');
+      if (draft.brands !== 'all' && !draft.brands.length) return toast('Chọn ít nhất 1 brand, hoặc bấm Chọn tất cả');
+      setMe({ name: nm, dept: draft.dept, brands: draft.brands }); view = 'list'; render();
+    };
+    return;
+  }
+  if (view === 'brands') {
+    bindPicker();
+    $('#saveBrands').onclick = () => {
+      if (draft.brands !== 'all' && !draft.brands.length) return toast('Chọn ít nhất 1 brand, hoặc bấm Chọn tất cả');
+      setMe({ ...me, brands: draft.brands }); view = 'list'; render(); scrollTo(0, 0);
+    };
     return;
   }
   if (view === 'list') {
     const q = $('#q'); if (q) q.oninput = () => { filt.q = q.value; const p = q.selectionStart; render(); const n = $('#q'); n.focus(); n.setSelectionRange(p, p); };
     document.querySelectorAll('[data-show]').forEach(b => b.onclick = () => { filt.show = b.dataset.show; render(); });
     document.querySelectorAll('.sample').forEach(b => b.onclick = () => open(b.dataset.id));
+    const eb = $('#editBrands'); if (eb) eb.onclick = () => { draft.brands = me.brands; view = 'brands'; render(); scrollTo(0, 0); };
     return;
   }
+  if (!qset()) return;
   document.querySelectorAll('.scale').forEach(sc => sc.querySelectorAll('button').forEach(b => b.onclick = () => {
     ev[sc.dataset.s] = +b.dataset.v; sc.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); bar();
   }));
@@ -201,7 +276,8 @@ function bind() {
 }
 function open(id) {
   cur = samples.find(s => s.id === id); if (!cur) return;
-  ev = { sampleId: id, tags: { pkg: [], app: [], tex: [], fla: [] }, c: { pkg: '', app: '', tex: '', fla: '' }, vs: '', note: '' };
+  const keys = (qset() || []).map(x => x[0]);
+  ev = { sampleId: id, tags: Object.fromEntries(keys.map(k => [k, []])), c: Object.fromEntries(keys.map(k => [k, ''])), vs: '', note: '' };
   view = 'score'; render(); scrollTo(0, 0);
 }
 async function save() {
