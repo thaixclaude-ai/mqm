@@ -59,7 +59,18 @@ select:disabled { background-color: #f6f5f3; color: #aaa; }
 .manual { display: flex; gap: 8px; margin-top: 10px; } .manual input { flex: 1; } .manual .btn { padding: 0 18px; }
 .prod { display: flex; gap: 12px; align-items: center; background: #f7f6f3; border-radius: 14px; padding: 12px; }
 .prod .ic { width: 46px; height: 46px; border-radius: 12px; background: var(--red-soft); color: var(--red); display: grid; place-items: center; flex: none; font-weight: 900; }
-.prod b { display: block; font-size: 17px; } .prod small { color: var(--muted); }
+.prod .pt { min-width: 0; flex: 1; }
+.prod b { display: block; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .prod small { color: var(--muted); font-size: 12px; letter-spacing: .03em; }
+.skubox { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #f7f6f3; border-radius: 14px; padding: 14px 16px; }
+.skubox b { font-size: 20px; } .skubox span { font-size: 11.5px; color: var(--muted); text-align: right; }
+.dbox { border: 1.5px solid var(--line); border-radius: 14px; overflow: hidden; }
+.drow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 8px 6px 14px; margin: 0; cursor: pointer; }
+.drow + .drow { border-top: 1px solid var(--line); }
+.drow > span { font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.drow input { width: auto; min-width: 150px; max-width: 58%; border: 0; text-align: right; font-weight: 700; padding: 10px 6px; background: transparent; min-height: 44px; }
+.drow input:focus { box-shadow: none; }
+.drow input::-webkit-date-and-time-value { text-align: right; }
+.card h2 { margin-bottom: 12px; }
 .tag { display: inline-block; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #eef1f7; color: var(--blue); }
 .tag.comp { background: #f4ecf8; color: #6d2f8e; } .tag.new { background: #fff4d6; color: #8a6300; }
 .cands { display: grid; gap: 8px; } .cand { text-align: left; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 10px 12px; font: inherit; cursor: pointer; }
@@ -117,7 +128,7 @@ const I18N = {
     manualPh: 'Hoặc nhập số barcode', lookup: 'Tra cứu', badCode: 'Barcode chưa đúng (8–14 chữ số)',
     found: 'Đã nhận diện', many: 'Barcode này trùng nhiều sản phẩm, chọn đúng sản phẩm:', unknown: 'Barcode mới, chưa có trong danh mục. Chọn sản phẩm (app sẽ nhớ cho lần sau):', rescan: 'Quét lại', change: 'Đổi sản phẩm',
     brand: 'Brand', chooseBrand: 'Chọn brand…', flavor: 'Vị', chooseFlavor: 'Chọn vị…', brandFirst: 'Chọn brand trước', flavorOther: 'Vị khác (nhập tay)…', flavorPh: 'Nhập tên vị',
-    sku: 'SKU (size)', chooseSku: 'Chọn SKU…', skuOther: 'SKU khác (nhập tay)…', skuPh: 'VD: 33g, Normal',
+    sku: 'SKU (size)', skuAuto: 'Tự nhận từ barcode', chooseSku: 'Chọn SKU…', skuOther: 'SKU khác (nhập tay)…', skuPh: 'VD: 33g, Normal',
     secProduct: 'Sản phẩm', secDate: 'Ngày', mfd: 'Ngày sản xuất', buyDate: 'Ngày mua', secPhoto: 'Ảnh mẫu', shot: 'Chụp ảnh mẫu', shotHint: 'Mặt trước + chỗ in ngày sản xuất · tối đa 3 ảnh', delPhoto: 'Xoá ảnh',
     ageBad: 'NSX sau ngày mua, kiểm tra lại', age: d => `Tuổi sản phẩm ${d} ngày`,
     missing: 'Còn thiếu: ', ready: 'Sẵn sàng lưu', save: 'Lưu mẫu', saving: 'Đang lưu…', m_prod: 'sản phẩm', m_market: 'thị trường', m_mfd: 'NSX', m_buy: 'ngày mua', m_photo: 'ảnh',
@@ -132,7 +143,7 @@ const I18N = {
     manualPh: '또는 바코드 번호 입력', lookup: '조회', badCode: '바코드가 올바르지 않습니다 (8–14자리)',
     found: '인식 완료', many: '여러 제품에 같은 바코드가 있습니다. 맞는 제품을 선택하세요:', unknown: '새 바코드입니다. 제품을 선택하세요 (다음부터 자동 인식):', rescan: '다시 스캔', change: '제품 변경',
     brand: '브랜드', chooseBrand: '브랜드 선택…', flavor: '맛', chooseFlavor: '맛 선택…', brandFirst: '먼저 브랜드를 선택하세요', flavorOther: '기타 맛 (직접 입력)…', flavorPh: '맛 이름 입력',
-    sku: 'SKU (규격)', chooseSku: 'SKU 선택…', skuOther: '기타 SKU (직접 입력)…', skuPh: '예: 33g, Normal',
+    sku: 'SKU (규격)', skuAuto: '바코드로 자동 인식', chooseSku: 'SKU 선택…', skuOther: '기타 SKU (직접 입력)…', skuPh: '예: 33g, Normal',
     secProduct: '제품', secDate: '날짜', mfd: '제조일', buyDate: '구매일', secPhoto: '샘플 사진', shot: '샘플 사진 촬영', shotHint: '앞면 + 제조일 인쇄 부분 · 최대 3장', delPhoto: '사진 삭제',
     ageBad: '제조일이 구매일보다 늦습니다. 확인하세요', age: d => `제품 나이 ${d}일`,
     missing: '미입력: ', ready: '저장 준비 완료', save: '샘플 저장', saving: '저장 중…', m_prod: '제품', m_market: '시장', m_mfd: '제조일', m_buy: '구매일', m_photo: '사진',
@@ -266,28 +277,35 @@ function ageInfo() {
   return `<span class="age"><i style="background:${col}"></i>${T('age')(days)}${txt ? ' · ' + txt : ''}</span>`;
 }
 function productPicker() {
-  const brands = brandsOf(cur.origin), flavors = flavorsOf(cur.brand), skus = skusOf(cur.brand, cur.flavor);
+  const brands = brandsOf(cur.origin), flavors = flavorsOf(cur.brand);
   const opt = (v, l, c) => `<option value="${esc(v)}" ${v === c ? 'selected' : ''}>${esc(l)}</option>`;
   return `<div class="field mt8"><div class="seg" data-k="origin">${['ORION', 'Đối thủ'].map(o => `<button class="${cur.origin === o ? 'on' : ''}" data-v="${o}">${esc(optL(o))}</button>`).join('')}</div></div>
     <div class="field"><span class="label">${T('brand')} <span class="req">*</span></span><select data-k="brand"><option value="">${T('chooseBrand')}</option>${brands.map(b => opt(b, b, cur.brand)).join('')}</select></div>
     <div class="field"><span class="label">${T('flavor')} <span class="req">*</span></span><select data-k="flavor" ${cur.brand ? '' : 'disabled'}><option value="">${cur.brand ? T('chooseFlavor') : T('brandFirst')}</option>${flavors.map(x => opt(x, x, cur.flavor)).join('')}${cur.brand ? opt(OTHER, T('flavorOther'), cur.flavor) : ''}</select>
-      ${cur.flavor === OTHER ? `<input class="mt8" data-k="flavorOther" placeholder="${esc(T('flavorPh'))}" value="${esc(cur.flavorOther)}">` : ''}</div>
-    <div class="field"><span class="label">${T('sku')}</span>${skus.length ? `<select data-k="sku"><option value="">${T('chooseSku')}</option>${skus.map(x => opt(x, x, cur.sku)).join('')}${opt(OTHER, T('skuOther'), cur.sku)}</select>${cur.sku === OTHER ? `<input class="mt8" data-k="skuOther" placeholder="${esc(T('skuPh'))}" value="${esc(cur.skuOther)}">` : ''}`
-      : `<input data-k="skuOther" placeholder="${esc(T('skuPh'))}" value="${esc(cur.skuOther)}" ${cur.brand ? '' : 'disabled'}>`}</div>`;
+      ${cur.flavor === OTHER ? `<input class="mt8" data-k="flavorOther" placeholder="${esc(T('flavorPh'))}" value="${esc(cur.flavorOther)}">` : ''}</div>`;
 }
+// SKU (size): tự hiện khi barcode đã có SKU; không có thì chọn theo danh mục hoặc nhập tay
+function skuField() {
+  const skus = skusOf(cur.brand, cur.flavor), opt = (v, l, c) => `<option value="${esc(v)}" ${v === c ? 'selected' : ''}>${esc(l)}</option>`;
+  return skus.length ? `<select data-k="sku" ${cur.brand ? '' : 'disabled'}><option value="">${T('chooseSku')}</option>${skus.map(x => opt(x, x, cur.sku)).join('')}${opt(OTHER, T('skuOther'), cur.sku)}</select>${cur.sku === OTHER ? `<input class="mt8" data-k="skuOther" placeholder="${esc(T('skuPh'))}" value="${esc(cur.skuOther)}">` : ''}`
+    : `<input data-k="skuOther" placeholder="${esc(T('skuPh'))}" value="${esc(cur.skuOther)}" ${cur.brand ? '' : 'disabled'}>`;
+}
+// Sau khi quét: 1 Sản phẩm · 2 SKU · 3 Thị trường · 4 Ngày (NSX / ngày mua) · 5 Ảnh
 function viewForm() {
-  const ok = cur.pick >= 0 && !cur.editing, c = ok ? cur.cands[cur.pick] : null, comp = cur.origin !== 'ORION';
-  const card = ok ? `<div class="prod"><div class="ic">✓</div><div><span class="tag ${comp ? 'comp' : ''}">${esc(optL(cur.origin))}</span><b>${esc(cur.brand)} · ${esc(flavorVal())}</b><small>${skuVal() ? 'SKU ' + esc(skuVal()) + ' · ' : ''}${esc(cur.barcode)}</small></div></div>
+  const ok = cur.pick >= 0 && !cur.editing, comp = cur.origin !== 'ORION';
+  const sec = (n, title, body, req) => `<section class="card"><h2><span class="n">${n}</span>${title}${req ? ' <span class="req" style="color:var(--red)">*</span>' : ''}</h2>${body}</section>`;
+  const card = ok ? `<div class="prod"><div class="ic">✓</div><div class="pt"><span class="tag ${comp ? 'comp' : ''}">${esc(optL(cur.origin))}</span><b>${esc(cur.brand)} · ${esc(flavorVal())}</b><small>${esc(cur.barcode)}</small></div></div>
       <div style="display:flex;gap:8px;margin-top:10px"><button class="btn ghost sm" id="rescan">${T('rescan')}</button><button class="btn ghost sm" id="change">${T('change')}</button></div>` : '';
   const cands = cur.cands.length > 1 && !ok ? `<p class="hint" style="margin:0 0 8px">${T('many')}</p><div class="cands">${cur.cands.map((x, i) => `<button class="cand ${cur.pick === i ? 'on' : ''}" data-cand="${i}"><b>${esc(x.brand)} · ${esc(x.flavor)}</b><br><small>SKU ${esc(x.sku)}</small></button>`).join('')}</div>` : '';
   const unknown = !ok && (cur.cands.length === 0 || cur.editing) ? `${cur.cands.length === 0 ? `<p class="hint" style="margin:0"><span class="tag new">${esc(cur.barcode)}</span> ${T('unknown')}</p>` : ''}${productPicker()}<button class="btn ghost sm" id="rescan">${T('rescan')}</button>` : '';
-  const market = `<div class="field" style="margin-top:14px"><span class="label">${T('market')} <span class="req">*</span></span><div class="seg" id="mk">${['North', 'South'].map(m => `<button class="${cur.market === m ? 'on' : ''}" data-v="${m}">${esc(optL(m))}</button>`).join('')}</div></div>`;
-  return `<section class="card"><h2><span class="n">1</span>${T('secProduct')}</h2>${card}${cands}${unknown}${market}</section>
-    <section class="card"><h2><span class="n">2</span>${T('secDate')}</h2><div class="row2">
-      <div class="field"><span class="label">${T('mfd')} <span class="req">*</span></span><input type="date" data-k="mfd" value="${esc(cur.mfd)}" max="${esc(cur.buyDate || today())}"></div>
-      <div class="field"><span class="label">${T('buyDate')} <span class="req">*</span></span><input type="date" data-k="buyDate" value="${esc(cur.buyDate)}" max="${today()}"></div></div>
-      <div id="age">${ageInfo()}</div></section>
-    <section class="card"><h2><span class="n">3</span>${T('secPhoto')} <span class="req" style="color:var(--red)">*</span></h2>
+  const sku = ok && skuVal() ? `<div class="skubox"><b>${esc(skuVal())}</b><span>${T('skuAuto')}</span></div>` : skuField();
+  const market = `<div class="seg" id="mk">${['North', 'South'].map(m => `<button class="${cur.market === m ? 'on' : ''}" data-v="${m}">${esc(optL(m))}</button>`).join('')}</div>`;
+  const dates = `<div class="dbox">
+      <label class="drow"><span>${T('mfd')} <span class="req">*</span></span><input type="date" data-k="mfd" value="${esc(cur.mfd)}" max="${esc(cur.buyDate || today())}"></label>
+      <label class="drow"><span>${T('buyDate')} <span class="req">*</span></span><input type="date" data-k="buyDate" value="${esc(cur.buyDate)}" max="${today()}"></label></div>
+      <div id="age">${ageInfo()}</div>`;
+  return sec(1, T('secProduct'), card + cands + unknown) + sec(2, T('sku'), sku) + sec(3, T('market'), market, true) + sec(4, T('secDate'), dates, true)
+    + `<section class="card"><h2><span class="n">5</span>${T('secPhoto')} <span class="req" style="color:var(--red)">*</span></h2>
       ${cur.photos.length < 3 ? `<button class="shot" id="shot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>${T('shot')}<small>${T('shotHint')}</small></button>` : ''}
       <div class="photos">${cur.photos.map((p, i) => `<div style="background-image:url(${p})"><button data-del="${i}" aria-label="${T('delPhoto')}">×</button></div>`).join('')}</div></section>`;
 }
