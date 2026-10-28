@@ -64,12 +64,13 @@ select:disabled { background-color: #f6f5f3; color: #aaa; }
 .skubox { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #f7f6f3; border-radius: 14px; padding: 14px 16px; }
 .skubox b { font-size: 20px; } .skubox span { font-size: 11.5px; color: var(--muted); text-align: right; }
 .dbox { border: 1.5px solid var(--line); border-radius: 14px; overflow: hidden; }
-.drow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 8px 6px 14px; margin: 0; cursor: pointer; }
+/* Ngày luôn hiện DD/MM/YYYY; ô chọn ngày của máy nằm phủ trong suốt lên cả dòng để bấm vào là mở lịch */
+.drow { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 14px; min-height: 54px; margin: 0; cursor: pointer; }
 .drow + .drow { border-top: 1px solid var(--line); }
 .drow > span { font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
-.drow input { width: auto; min-width: 150px; max-width: 58%; border: 0; text-align: right; font-weight: 700; padding: 10px 6px; background: transparent; min-height: 44px; }
-.drow input:focus { box-shadow: none; }
-.drow input::-webkit-date-and-time-value { text-align: right; }
+.drow .dval { font-size: 17px; font-variant-numeric: tabular-nums; } .drow .dval.ph { color: #b5b2ad; font-weight: 600; }
+.drow input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; cursor: pointer; }
+.drow:focus-within { background: var(--red-soft); }
 .card h2 { margin-bottom: 12px; }
 .tag { display: inline-block; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #eef1f7; color: var(--blue); }
 .tag.comp { background: #f4ecf8; color: #6d2f8e; } .tag.new { background: #fff4d6; color: #8a6300; }
@@ -158,7 +159,7 @@ const optL = v => I18N[lang].opt[v] || v;
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
-const dmy = d => { const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${+m[3]}/${+m[2]}/${m[1]}` : ''; };
+const dmy = d => { const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; };
 const uniq = a => [...new Set(a)];
 let toastT;
 const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600); };
@@ -302,8 +303,8 @@ function viewForm() {
   const sku = ok && skuVal() ? `<div class="skubox"><b>${esc(skuVal())}</b><span>${T('skuAuto')}</span></div>` : skuField();
   const market = `<div class="seg" id="mk">${['North', 'South'].map(m => `<button class="${cur.market === m ? 'on' : ''}" data-v="${m}">${esc(optL(m))}</button>`).join('')}</div>`;
   const dates = `<div class="dbox">
-      <label class="drow"><span>${T('mfd')} <span class="req">*</span></span><input type="date" data-k="mfd" value="${esc(cur.mfd)}" max="${esc(cur.buyDate || today())}"></label>
-      <label class="drow"><span>${T('buyDate')} <span class="req">*</span></span><input type="date" data-k="buyDate" value="${esc(cur.buyDate)}" max="${today()}"></label></div>
+      <label class="drow"><span>${T('mfd')} <span class="req">*</span></span><b class="dval ${cur.mfd ? '' : 'ph'}">${cur.mfd ? dmy(cur.mfd) : 'DD/MM/YYYY'}</b><input type="date" data-k="mfd" value="${esc(cur.mfd)}" max="${esc(cur.buyDate || today())}"></label>
+      <label class="drow"><span>${T('buyDate')} <span class="req">*</span></span><b class="dval ${cur.buyDate ? '' : 'ph'}">${cur.buyDate ? dmy(cur.buyDate) : 'DD/MM/YYYY'}</b><input type="date" data-k="buyDate" value="${esc(cur.buyDate)}" max="${today()}"></label></div>
       <div id="age">${ageInfo()}</div>`;
   return sec(1, T('secProduct'), card + cands + unknown) + sec(2, T('sku'), sku) + sec(3, T('market'), market, true) + sec(4, T('secDate'), dates, true)
     + `<section class="card"><h2><span class="n">5</span>${T('secPhoto')} <span class="req" style="color:var(--red)">*</span></h2>
@@ -363,7 +364,7 @@ function bind() {
     const k = el.dataset.k;
     if (el.classList.contains('seg')) el.querySelectorAll('button').forEach(b => b.onclick = () => { cur[k] = b.dataset.v; cur.brand = ''; cur.flavor = ''; cur.sku = ''; render(); });
     else if (el.tagName === 'SELECT') el.onchange = () => { cur[k] = el.value; if (k === 'brand') { cur.flavor = ''; cur.sku = ''; } if (k === 'flavor') cur.sku = ''; cur.cat = catOf(cur.brand, flavorVal()); render(); };
-    else if (el.type === 'date') el.onchange = () => { cur[k] = el.value; render(); };
+    else if (el.type === 'date') { el.onchange = () => { cur[k] = el.value; render(); }; el.onclick = () => { try { el.showPicker(); } catch (e) {} }; }
     else el.oninput = () => { cur[k] = el.value; status(); };
   });
   const shot = $('#shot'); if (shot) shot.onclick = () => $('#cam').click();
