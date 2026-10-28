@@ -16,7 +16,7 @@ body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.45 "S
 .hero .top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .hero .brand { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: .22em; font-weight: 700; opacity: .9; }
 .hero .brand svg { width: 28px; height: 18px; }
-.hero .right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.hero .right { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
 .hero h1 { margin: 10px 0 4px; font-size: 25px; font-weight: 800; }
 .hero p { margin: 0; opacity: .85; font-size: 13.5px; }
 .lang { display: inline-flex; background: rgba(255,255,255,.16); border-radius: 999px; padding: 3px; gap: 2px; }
@@ -128,7 +128,7 @@ const I18N = {
     manualPh: 'Hoặc nhập số barcode', lookup: 'Tra cứu', badCode: 'Barcode chưa đúng (8–14 chữ số)',
     found: 'Đã nhận diện', many: 'Barcode này trùng nhiều sản phẩm, chọn đúng sản phẩm:', unknown: 'Barcode mới, chưa có trong danh mục. Chọn sản phẩm (app sẽ nhớ cho lần sau):', rescan: 'Quét lại', change: 'Đổi sản phẩm',
     brand: 'Brand', chooseBrand: 'Chọn brand…', flavor: 'Vị', chooseFlavor: 'Chọn vị…', brandFirst: 'Chọn brand trước', flavorOther: 'Vị khác (nhập tay)…', flavorPh: 'Nhập tên vị',
-    sku: 'SKU (size)', skuAuto: 'Tự nhận từ barcode', chooseSku: 'Chọn SKU…', skuOther: 'SKU khác (nhập tay)…', skuPh: 'VD: 33g, Normal',
+    back: 'Quay lại', sku: 'SKU (size)', skuAuto: 'Tự nhận từ barcode', chooseSku: 'Chọn SKU…', skuOther: 'SKU khác (nhập tay)…', skuPh: 'VD: 33g, Normal',
     secProduct: 'Sản phẩm', secDate: 'Ngày', mfd: 'Ngày sản xuất', buyDate: 'Ngày mua', secPhoto: 'Ảnh mẫu', shot: 'Chụp ảnh mẫu', shotHint: 'Mặt trước + chỗ in ngày sản xuất · tối đa 3 ảnh', delPhoto: 'Xoá ảnh',
     ageBad: 'NSX sau ngày mua, kiểm tra lại', age: d => `Tuổi sản phẩm ${d} ngày`,
     missing: 'Còn thiếu: ', ready: 'Sẵn sàng lưu', save: 'Lưu mẫu', saving: 'Đang lưu…', m_prod: 'sản phẩm', m_market: 'thị trường', m_mfd: 'NSX', m_buy: 'ngày mua', m_photo: 'ảnh',
@@ -143,7 +143,7 @@ const I18N = {
     manualPh: '또는 바코드 번호 입력', lookup: '조회', badCode: '바코드가 올바르지 않습니다 (8–14자리)',
     found: '인식 완료', many: '여러 제품에 같은 바코드가 있습니다. 맞는 제품을 선택하세요:', unknown: '새 바코드입니다. 제품을 선택하세요 (다음부터 자동 인식):', rescan: '다시 스캔', change: '제품 변경',
     brand: '브랜드', chooseBrand: '브랜드 선택…', flavor: '맛', chooseFlavor: '맛 선택…', brandFirst: '먼저 브랜드를 선택하세요', flavorOther: '기타 맛 (직접 입력)…', flavorPh: '맛 이름 입력',
-    sku: 'SKU (규격)', skuAuto: '바코드로 자동 인식', chooseSku: 'SKU 선택…', skuOther: '기타 SKU (직접 입력)…', skuPh: '예: 33g, Normal',
+    back: '뒤로', sku: 'SKU (규격)', skuAuto: '바코드로 자동 인식', chooseSku: 'SKU 선택…', skuOther: '기타 SKU (직접 입력)…', skuPh: '예: 33g, Normal',
     secProduct: '제품', secDate: '날짜', mfd: '제조일', buyDate: '구매일', secPhoto: '샘플 사진', shot: '샘플 사진 촬영', shotHint: '앞면 + 제조일 인쇄 부분 · 최대 3장', delPhoto: '사진 삭제',
     ageBad: '제조일이 구매일보다 늦습니다. 확인하세요', age: d => `제품 나이 ${d}일`,
     missing: '미입력: ', ready: '저장 준비 완료', save: '샘플 저장', saving: '저장 중…', m_prod: '제품', m_market: '시장', m_mfd: '제조일', m_buy: '구매일', m_photo: '사진',
@@ -251,7 +251,8 @@ function hero() {
   document.documentElement.lang = lang; document.title = 'MQM · ' + T('title');
   $('#hero').innerHTML = `<div class="top"><div class="brand"><svg viewBox="0 0 46 30" fill="#fff"><ellipse cx="13" cy="15" rx="12" ry="13"/><ellipse cx="33" cy="15" rx="12" ry="13"/><circle cx="16" cy="12" r="4" fill="#c8102e"/><circle cx="36" cy="12" r="4" fill="#c8102e"/></svg>${T('step')}</div>
     <div class="right"><div class="lang"><button data-lang="vi" class="${lang === 'vi' ? 'on' : ''}">VI</button><button data-lang="ko" class="${lang === 'ko' ? 'on' : ''}">한국어</button></div>
-    ${me && view !== 'setup' ? `<button class="who" id="who">${esc(me.name)} · ${esc(me.dept === 'Other' ? me.deptOther : me.dept)} ▾</button>` : ''}</div></div>
+    ${me && view !== 'setup' ? `<button class="who" id="who">${esc(me.name)} · ${esc(me.dept === 'Other' ? me.deptOther : me.dept)} ▾</button>` : ''}
+    ${view === 'form' || (view === 'setup' && me) ? `<button class="who" id="back">← ${T('back')}</button>` : ''}</div></div>
     <h1>${T('title')}</h1><p>${view === 'setup' ? T('subSetup') : view === 'form' ? T('subForm') : T('subScan')}</p>`;
   $('#next').textContent = T('next'); $('#doneHead').textContent = T('doneHead');
 }
@@ -333,6 +334,8 @@ function render() {
 }
 function bindTop() {
   document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { lang = b.dataset.lang; try { localStorage.setItem('mqm1a-lang', lang); } catch (e) {} const y = scrollY; render(); scrollTo(0, y); });
+  // Quay lại màn hình quét: từ trang mẫu thì bỏ mẫu đang nhập và mở camera quét lại
+  const back = $('#back'); if (back) back.onclick = () => { const fromForm = view === 'form'; cur = null; view = 'scan'; render(); scrollTo(0, 0); if (fromForm) startScan(); };
   const who = $('#who'); if (who) who.onclick = () => { stopScan(); draft = { name: me.name, dept: me.dept, deptOther: me.deptOther || '' }; view = 'setup'; render(); };
 }
 function bind() {
