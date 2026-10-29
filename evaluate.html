@@ -82,6 +82,12 @@ input:focus, textarea:focus { outline: none; border-color: var(--navy); box-shad
 .scale button.y.on { background: var(--y); border-color: var(--y); color: #fff; }
 .scale button.r.on { background: var(--r); border-color: var(--r); color: #fff; }
 .attr .chips { margin-bottom: 10px; }
+.attr.fine { box-shadow: inset 4px 0 0 var(--g), 0 1px 2px rgba(0,0,0,.04); } .attr.bad { box-shadow: inset 4px 0 0 var(--r), 0 1px 2px rgba(0,0,0,.04); }
+.seg.okis button.on.ok { background: var(--g); color: #fff; } .seg.okis button.on.is { background: var(--r); color: #fff; }
+details.ref { margin-top: 10px; } details.ref summary { font-size: 12.5px; color: var(--muted); font-weight: 700; cursor: pointer; padding: 4px 0; }
+details.ref .scale { margin: 8px 0 0; } .scale.ref button { height: 36px; font-size: 14px; }
+.attr textarea { min-height: 64px; font-size: 15px; }
+.attr.cause { border: 1.5px solid var(--r-soft); }
 .attr input { padding: 10px 12px; font-size: 15px; }
 .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: #f1efec; border-radius: 14px; padding: 4px; gap: 4px; }
 .seg button { border: 0; background: none; padding: 10px 4px; border-radius: 11px; font: inherit; font-size: 13.5px; font-weight: 700; color: var(--muted); cursor: pointer; }
@@ -121,10 +127,19 @@ const QSETS = {
   piDesign: null,
 };
 const VS = ['Tốt hơn', 'Tương đương', 'Kém hơn'];   // giá trị lưu
+// Định tính: mỗi mục ghi "Ổn" hoặc "Có vấn đề" + mô tả; có vấn đề thì ghi nguyên nhân nghi ngờ (trong / ngoài), giải pháp, bộ phận xử lý. Điểm 1–9 chỉ để tham khảo.
+const CAUSE_IN = ['Nguyên liệu', 'Phụ liệu / bao bì', 'Process sản xuất', 'Bảo quản kho nhà máy'];
+const CAUSE_OUT = ['Nhà cung cấp', 'Vận chuyển', 'Kho NPP / đại lý', 'Trưng bày / điểm bán', 'Thị trường / thời tiết', 'Chưa rõ'];
+const OWNERS = ['QA', 'R&D', 'Production', 'PUR', 'SCM', 'Sales', 'MKT', 'Design', 'PI', 'FQS'];
 const I18N = {
   vi: {
     step: 'MQM · BƯỚC 1A', title: 'Đánh giá mẫu', subLogin: 'Nhập tên, bộ phận và chọn brand mình phụ trách.', subList: 'Chọn mẫu để chấm. Mỗi người chấm độc lập.',
-    subScore: 'Chấm từng mục từ 1 (tốt) đến 9 (kém).', back: '← Danh sách', brandsTitle: 'Brand phụ trách', subBrands: 'Chỉ mẫu của các brand này hiện trong danh sách của bạn.',
+    subScore: 'Ghi nhận vấn đề bằng mô tả theo chuyên môn của bạn. Điểm chỉ để tham khảo.', back: '← Danh sách',
+    ok: 'Ổn', issue: 'Có vấn đề', desc: 'Mô tả hiện tượng *', descPh: 'VD: gói xẹp, bánh ỉu ở góc, vị nhạt hơn lô trước…', refScore: 'Điểm tham khảo (không bắt buộc) · 1 tốt → 9 kém',
+    causeTitle: 'Nguyên nhân & giải pháp', causeSub: 'Theo chuyên môn của bộ phận bạn', causeIn: 'Nguyên nhân nghi ngờ · bên trong', causeOut: 'Nguyên nhân nghi ngờ · bên ngoài',
+    solution: 'Giải pháp đề xuất *', solutionPh: 'VD: QA kiểm lực seal lô 09/2026; SCM kiểm kho NPP…', owners: 'Bộ phận nên xử lý *', overall: 'Chung', mqmRef: 'Điểm tổng thể (tham khảo)',
+    need: 'Còn thiếu: ', nAttr: n => `${n} mục chưa chọn Ổn / Có vấn đề`, nDesc: 'mô tả', nCause: 'nguyên nhân', nSol: 'giải pháp', nOwner: 'bộ phận xử lý', ready: 'Sẵn sàng lưu',
+    allOk: 'Tất cả ổn', cause: {}, owner: {}, brandsTitle: 'Brand phụ trách', subBrands: 'Chỉ mẫu của các brand này hiện trong danh sách của bạn.',
     loading: 'Đang tải…', name: 'Họ tên', namePh: 'VD: Nguyễn Văn A', dept: 'Bộ phận', brands: 'Brand phụ trách', go: 'Vào danh sách mẫu',
     needName: 'Nhập họ tên và chọn bộ phận', needBrand: 'Chọn ít nhất 1 brand, hoặc bấm Chọn tất cả',
     loadingBrands: 'Đang tải danh sách brand…', noSamplesYet: 'Chưa có mẫu nào được đăng ký. Có thể chọn "Tất cả brand" để nhận mọi mẫu mới.',
@@ -143,7 +158,14 @@ const I18N = {
   },
   ko: {
     step: 'MQM · 1A 단계', title: '샘플 평가', subLogin: '이름, 부서를 입력하고 담당 브랜드를 선택하세요.', subList: '평가할 샘플을 선택하세요. 각자 독립적으로 평가합니다.',
-    subScore: '각 항목을 1(양호) ~ 9(불량)로 평가하세요.', back: '← 목록', brandsTitle: '담당 브랜드', subBrands: '선택한 브랜드의 샘플만 목록에 표시됩니다.',
+    subScore: '부서 전문성으로 문제를 서술해 주세요. 점수는 참고용입니다.', back: '← 목록',
+    ok: '이상 없음', issue: '문제 있음', desc: '현상 서술 *', descPh: '예: 봉지 납작, 모서리 눅눅, 이전 로트보다 맛이 약함…', refScore: '참고 점수 (선택) · 1 양호 → 9 불량',
+    causeTitle: '원인 및 대책', causeSub: '소속 부서 전문성 기준', causeIn: '추정 원인 · 내부', causeOut: '추정 원인 · 외부',
+    solution: '대책 제안 *', solutionPh: '예: QA 09/2026 로트 실링 점검; SCM 대리점 창고 점검…', owners: '처리 부서 *', overall: '종합', mqmRef: '종합 점수 (참고)',
+    need: '미입력: ', nAttr: n => `${n}개 항목 이상 없음 / 문제 있음 미선택`, nDesc: '서술', nCause: '원인', nSol: '대책', nOwner: '처리 부서', ready: '저장 준비 완료',
+    allOk: '모두 이상 없음',
+    cause: { 'Nguyên liệu': '원료', 'Phụ liệu / bao bì': '부자재 / 포장재', 'Process sản xuất': '생산 공정', 'Bảo quản kho nhà máy': '공장 창고 보관', 'Nhà cung cấp': '협력사',
+      'Vận chuyển': '운송', 'Kho NPP / đại lý': '대리점 창고', 'Trưng bày / điểm bán': '매장 진열', 'Thị trường / thời tiết': '시장 / 날씨', 'Chưa rõ': '불명' }, owner: { Production: '생산' }, brandsTitle: '담당 브랜드', subBrands: '선택한 브랜드의 샘플만 목록에 표시됩니다.',
     loading: '불러오는 중…', name: '이름', namePh: '예: 홍길동', dept: '부서', brands: '담당 브랜드', go: '샘플 목록으로',
     needName: '이름을 입력하고 부서를 선택하세요', needBrand: '브랜드를 1개 이상 선택하거나 전체 선택을 누르세요',
     loadingBrands: '브랜드 목록을 불러오는 중…', noSamplesYet: '등록된 샘플이 없습니다. "전체 브랜드"를 선택하면 새 샘플을 모두 받습니다.',
@@ -246,28 +268,50 @@ function viewList() {
         <div class="st">${m ? `<span class="tag ok">${T('scored')}</span>` : ''}<div>${T('people')(n)}</div></div></button>`; }).join('')
     : `<div class="card empty">${!pool.length ? (samples.length ? T('noMine') : T('noneYet')) : T('allDone')}</div>`}`;
 }
+const anyIssue = () => Object.values(ev.st).includes('issue');
+// Còn thiếu gì trước khi lưu: mỗi mục phải chọn Ổn / Có vấn đề; có vấn đề thì cần mô tả (hoặc chọn lỗi), nguyên nhân, giải pháp, bộ phận xử lý
+function missing() {
+  const keys = (qset() || []).map(x => x[0]), m = [], unset = keys.filter(k => !ev.st[k]).length;
+  if (unset) m.push(T('nAttr')(unset));
+  if (keys.some(k => ev.st[k] === 'issue' && !ev.c[k].trim() && !ev.tags[k].length)) m.push(T('nDesc'));
+  if (anyIssue()) {
+    if (!ev.causeIn.length && !ev.causeOut.length) m.push(T('nCause'));
+    if (!ev.solution.trim()) m.push(T('nSol'));
+    if (!ev.owners.length) m.push(T('nOwner'));
+  }
+  return m;
+}
 function viewScore() {
   const s = cur, cls = v => v <= 3 ? 'g' : v <= 6 ? 'y' : 'r', Q = qset();
-  const scale = k => `<div class="scale" data-s="${k}">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(v => `<button class="${cls(v)} ${ev[k] === v ? 'on' : ''}" data-v="${v}">${v}</button>`).join('')}</div>`;
+  const scale = k => `<div class="scale ref" data-s="${k}">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(v => `<button class="${cls(v)} ${ev[k] === v ? 'on' : ''}" data-v="${v}">${v}</button>`).join('')}</div>`;
+  const pick = (attr, list, grp) => `<div class="chips" data-pick="${attr}">${list.map(x => `<button class="chip sm ${ev[attr].includes(x) ? 'on' : ''}" data-x="${esc(x)}">${esc(L(grp, x))}</button>`).join('')}</div>`;
   const head = `<div class="card head"><div class="th" style="${s.thumb ? `background-image:url(${s.thumb})` : ''}"></div>
       <div><span class="id">${esc(s.id)}</span> ${originTag(s)}<b>${esc(s.brand)} · ${esc(s.flavor)}</b>
       <small>${s.sku ? esc(s.sku) + ' · ' : ''}${T('mfdShort')} ${dmy(s.mfd)} · ${T('buyShort')} ${dmy(s.buyDate)} · ${esc(L('market', s.market))}</small></div></div>`;
   if (!Q) return head + `<div class="card note">${T('qsetWaitOne')(esc(me.dept))}</div>`;
   return head + `${mine(s.id) ? `<div class="card note">${T('already')}</div>` : ''}
-    <div class="legend"><span><i style="background:var(--g)"></i>${T('good')}</span><span><i style="background:var(--y)"></i>${T('mid')}</span><span><i style="background:var(--r)"></i>${T('bad')}</span></div>
-    ${Q.map(a => { const [k, en, , , tags] = a; return `<div class="card attr"><h3>${en} <span>${attrName(a)}</span></h3>${scale(k)}
-      <div class="chips" data-t="${k}">${tags.map(t => `<button class="chip sm ${ev.tags[k].includes(t) ? 'on' : ''}" data-tag="${esc(t)}">${esc(L('tags', t))}</button>`).join('')}</div>
-      <input data-c="${k}" placeholder="${esc(T('comment')(attrName(a)))}" value="${esc(ev.c[k])}"></div>`; }).join('')}
-    <div class="card attr"><h3>MQM score <span>${T('mqmSub')}</span></h3>${scale('mqm')}
+    <div class="stat"><span></span><button class="linkbtn" id="allOk">${T('allOk')}</button></div>
+    ${Q.map(a => { const [k, en, , , tags] = a, st = ev.st[k]; return `<div class="card attr ${st === 'issue' ? 'bad' : st === 'ok' ? 'fine' : ''}"><h3>${en} <span>${attrName(a)}</span></h3>
+      <div class="seg okis" data-st="${k}"><button class="${st === 'ok' ? 'on ok' : ''}" data-v="ok">✓ ${T('ok')}</button><button class="${st === 'issue' ? 'on is' : ''}" data-v="issue">! ${T('issue')}</button></div>
+      ${st === 'issue' ? `<div class="chips" data-t="${k}" style="margin-top:10px">${tags.map(t => `<button class="chip sm ${ev.tags[k].includes(t) ? 'on' : ''}" data-tag="${esc(t)}">${esc(L('tags', t))}</button>`).join('')}</div>
+        <span class="label">${T('desc')}</span><textarea data-c="${k}" placeholder="${esc(T('descPh'))}">${esc(ev.c[k])}</textarea>` : ''}
+      <details class="ref" ${ev[k] ? 'open' : ''}><summary>${T('refScore')}</summary>${scale(k)}</details></div>`; }).join('')}
+    ${anyIssue() ? `<div class="card attr cause"><h3>${T('causeTitle')} <span>${T('causeSub')}</span></h3>
+      <span class="label">${T('causeIn')}</span>${pick('causeIn', CAUSE_IN, 'cause')}
+      <span class="label" style="margin-top:12px">${T('causeOut')}</span>${pick('causeOut', CAUSE_OUT, 'cause')}
+      <span class="label" style="margin-top:12px">${T('solution')}</span><textarea id="solution" placeholder="${esc(T('solutionPh'))}">${esc(ev.solution)}</textarea>
+      <span class="label" style="margin-top:12px">${T('owners')}</span>${pick('owners', OWNERS, 'owner')}</div>` : ''}
+    <div class="card attr"><h3>${T('overall')}</h3>
       <div class="field"><span class="label">${T('vsLabel')}</span><div class="seg" id="vs">${VS.map(x => `<button class="${ev.vs === x ? 'on' : ''}" data-v="${x}">${esc(L('vs', x))}</button>`).join('')}</div></div>
-      <span class="label">${T('note')}</span><textarea id="note">${esc(ev.note)}</textarea></div>`;
+      <span class="label">${T('note')}</span><textarea id="note">${esc(ev.note)}</textarea>
+      <details class="ref" ${ev.mqm ? 'open' : ''}><summary>${T('mqmRef')}</summary>${scale('mqm')}</details></div>`;
 }
 function bar() {
   const b = $('#bar'), Q = view === 'score' && me && qset();
   if (!Q) { b.hidden = true; return; }
-  const keys = Q.map(x => x[0]).concat('mqm'), n = keys.filter(k => ev[k]).length;
+  const keys = Q.map(x => x[0]), n = keys.filter(k => ev.st[k]).length, m = missing();
   b.hidden = false;
-  b.innerHTML = `<div class="in"><div class="prog">${T('prog')(n, keys.length)}<div class="track"><i style="width:${n / keys.length * 100}%"></i></div></div><button class="btn" id="save" ${n < keys.length ? 'disabled' : ''}>${T('save')}</button></div>`;
+  b.innerHTML = `<div class="in"><div class="prog">${m.length ? esc(T('need') + m.join(', ')) : T('ready')}<div class="track"><i style="width:${n / keys.length * 100}%"></i></div></div><button class="btn" id="save" ${m.length ? 'disabled' : ''}>${T('save')}</button></div>`;
   $('#save').onclick = save;
 }
 function render() {
@@ -325,27 +369,42 @@ function bind() {
     return;
   }
   if (!qset()) return;
+  const keep = () => { const y = scrollY; render(); scrollTo(0, y); };
+  // Điểm tham khảo: bấm lại số đang chọn để bỏ
   document.querySelectorAll('.scale').forEach(sc => sc.querySelectorAll('button').forEach(b => b.onclick = () => {
-    ev[sc.dataset.s] = +b.dataset.v; sc.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); bar();
+    const v = +b.dataset.v; ev[sc.dataset.s] = ev[sc.dataset.s] === v ? null : v; sc.querySelectorAll('button').forEach(x => x.classList.toggle('on', +x.dataset.v === ev[sc.dataset.s])); bar();
   }));
+  document.querySelectorAll('[data-st]').forEach(sg => sg.querySelectorAll('button').forEach(b => b.onclick = () => { ev.st[sg.dataset.st] = b.dataset.v; keep(); }));
+  const ao = $('#allOk'); if (ao) ao.onclick = () => { Object.keys(ev.st).forEach(k => { ev.st[k] = 'ok'; }); keep(); };
   // Lưu giá trị gốc của lỗi (data-tag), không lưu chữ đã dịch
   document.querySelectorAll('[data-t]').forEach(tg => tg.querySelectorAll('button').forEach(b => b.onclick = () => {
-    const a = ev.tags[tg.dataset.t], t = b.dataset.tag, i = a.indexOf(t); i >= 0 ? a.splice(i, 1) : a.push(t); b.classList.toggle('on', i < 0);
+    const a = ev.tags[tg.dataset.t], t = b.dataset.tag, i = a.indexOf(t); i >= 0 ? a.splice(i, 1) : a.push(t); b.classList.toggle('on', i < 0); bar();
   }));
-  document.querySelectorAll('[data-c]').forEach(i => i.oninput = () => { ev.c[i.dataset.c] = i.value; });
+  document.querySelectorAll('[data-pick]').forEach(pg => pg.querySelectorAll('button').forEach(b => b.onclick = () => {
+    const a = ev[pg.dataset.pick], x = b.dataset.x, i = a.indexOf(x); i >= 0 ? a.splice(i, 1) : a.push(x); b.classList.toggle('on', i < 0); bar();
+  }));
+  document.querySelectorAll('[data-c]').forEach(i => i.oninput = () => { ev.c[i.dataset.c] = i.value; bar(); });
+  const so = $('#solution'); if (so) so.oninput = () => { ev.solution = so.value; bar(); };
   document.querySelectorAll('#vs button').forEach(b => b.onclick = () => { ev.vs = ev.vs === b.dataset.v ? '' : b.dataset.v; document.querySelectorAll('#vs button').forEach(x => x.classList.toggle('on', x.dataset.v === ev.vs)); });
   $('#note').oninput = e => { ev.note = e.target.value; };
 }
 function open(id) {
   cur = samples.find(s => s.id === id); if (!cur) return;
   const keys = (qset() || []).map(x => x[0]);
-  ev = { sampleId: id, tags: Object.fromEntries(keys.map(k => [k, []])), c: Object.fromEntries(keys.map(k => [k, ''])), vs: '', note: '' };
+  ev = { sampleId: id, st: Object.fromEntries(keys.map(k => [k, ''])), tags: Object.fromEntries(keys.map(k => [k, []])), c: Object.fromEntries(keys.map(k => [k, ''])),
+    causeIn: [], causeOut: [], solution: '', owners: [], vs: '', note: '' };
   view = 'score'; render(); scrollTo(0, 0);
 }
 async function save() {
   const b = $('#save'); b.disabled = true; b.textContent = T('saving');
   try {
-    const r = await api.post('saveEval', { ...ev, name: me.name, dept: me.dept });
+    // Mục "Ổn" thì không gửi lỗi / mô tả; không có vấn đề nào thì không gửi nguyên nhân / giải pháp
+    const keys = Object.keys(ev.st), iss = anyIssue();
+    const data = { ...ev, name: me.name, dept: me.dept, issue: iss ? 'Y' : 'N',
+      tags: Object.fromEntries(keys.map(k => [k, ev.st[k] === 'issue' ? ev.tags[k] : []])), c: Object.fromEntries(keys.map(k => [k, ev.st[k] === 'issue' ? ev.c[k].trim() : ''])),
+      causeIn: iss ? ev.causeIn : [], causeOut: iss ? ev.causeOut : [], solution: iss ? ev.solution.trim() : '', owners: iss ? ev.owners : [] };
+    delete data.st;
+    const r = await api.post('saveEval', data);
     if (!r.ok) throw new Error(r.error || '?');
     evals = evals.filter(e => !(e.sampleId === ev.sampleId && String(e.name).toLowerCase() === me.name.toLowerCase()));
     evals.push({ sampleId: ev.sampleId, name: me.name, at: r.at });
