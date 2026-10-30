@@ -124,7 +124,7 @@ const OTHER = '__other__';
 const I18N = {
   vi: {
     step: 'MQM · BƯỚC 1A', title: 'Sample Register', subSetup: 'Nhập tên và bộ phận mua một lần, sau đó chỉ cần quét barcode.', subScan: 'Quét barcode trên gói mẫu.', subForm: 'Kiểm tra sản phẩm, nhập ngày và chụp ảnh.',
-    name: 'Tên người mua', namePh: 'VD: Nguyễn Văn A', dept: 'Bộ phận mua', deptOther: 'Nhập bộ phận', market: 'Thị trường', start: 'Bắt đầu quét', needSetup: 'Nhập tên và chọn bộ phận',
+    name: 'Tên người mua', namePh: 'VD: Nguyễn Văn A', dept: 'Bộ phận mua', deptOther: 'Nhập bộ phận', market: 'Nơi mua', fac: 'Nhà máy sản xuất', start: 'Bắt đầu quét', needSetup: 'Nhập tên và chọn bộ phận',
     scan: 'Quét barcode', scanning: 'Đưa barcode vào khung…', camErr: 'Không mở được camera. Cho phép camera trong trình duyệt, hoặc nhập barcode bên dưới.', stop: 'Dừng quét',
     manualPh: 'Hoặc nhập số barcode', lookup: 'Tra cứu', badCode: 'Barcode chưa đúng (8–14 chữ số)',
     found: 'Đã nhận diện', many: 'Barcode này trùng nhiều sản phẩm, chọn đúng sản phẩm:', unknown: 'Barcode mới, chưa có trong danh mục. Chọn sản phẩm (app sẽ nhớ cho lần sau):', rescan: 'Quét lại', change: 'Đổi sản phẩm',
@@ -132,14 +132,14 @@ const I18N = {
     back: 'Quay lại', sku: 'SKU (size)', skuAuto: 'Tự nhận từ barcode', chooseSku: 'Chọn SKU…', skuOther: 'SKU khác (nhập tay)…', skuPh: 'VD: 33g, Normal',
     secProduct: 'Sản phẩm', secDate: 'Ngày', mfd: 'Ngày sản xuất', buyDate: 'Ngày mua', secPhoto: 'Ảnh mẫu', shot: 'Chụp ảnh mẫu', shotHint: 'Mặt trước + chỗ in ngày sản xuất · tối đa 3 ảnh', delPhoto: 'Xoá ảnh',
     ageBad: 'NSX sau ngày mua, kiểm tra lại', age: d => `Tuổi sản phẩm ${d} ngày`,
-    missing: 'Còn thiếu: ', ready: 'Sẵn sàng lưu', save: 'Lưu mẫu', saving: 'Đang lưu…', m_prod: 'sản phẩm', m_market: 'thị trường', m_mfd: 'NSX', m_buy: 'ngày mua', m_photo: 'ảnh',
+    missing: 'Còn thiếu: ', ready: 'Sẵn sàng lưu', save: 'Lưu mẫu', saving: 'Đang lưu…', m_prod: 'sản phẩm', m_market: 'nơi mua', m_fac: 'nhà máy', m_mfd: 'NSX', m_buy: 'ngày mua', m_photo: 'ảnh',
     doneHead: 'Đã lưu. Mã mẫu (ghi lên gói):', next: 'Quét mẫu tiếp theo', queued: 'Đang gửi lên hệ thống, mã sẽ hiện sau vài giây. Có thể quét mẫu tiếp ngay.', sending: 'Đang gửi…', failed: 'Lỗi', recent: 'Vừa đăng ký', saveErr: 'Chưa lưu được: ',
     loadErr: e => `Không tải được danh mục: ${e}. Kiểm tra mạng rồi tải lại trang.`, loading: 'Đang tải danh mục…', learned: 'Đã ghi nhớ barcode mới',
-    opt: { Other: 'Other', North: 'North', South: 'South', ORION: 'ORION', 'Đối thủ': 'Đối thủ' },
+    opt: { Other: 'Other', North: 'Miền Bắc', South: 'Miền Nam', ORION: 'ORION', 'Đối thủ': 'Đối thủ' },
   },
   ko: {
     step: 'MQM · 1A 단계', title: 'Sample Register', subSetup: '이름과 구매 부서를 한 번 입력하면, 이후에는 바코드만 스캔하면 됩니다.', subScan: '샘플 포장의 바코드를 스캔하세요.', subForm: '제품을 확인하고 날짜와 사진을 입력하세요.',
-    name: '구매자 이름', namePh: '예: 홍길동', dept: '구매 부서', deptOther: '부서 입력', market: '시장', start: '스캔 시작', needSetup: '이름과 부서를 입력하세요',
+    name: '구매자 이름', namePh: '예: 홍길동', dept: '구매 부서', deptOther: '부서 입력', market: '구매처', fac: '생산 공장', start: '스캔 시작', needSetup: '이름과 부서를 입력하세요',
     scan: '바코드 스캔', scanning: '바코드를 프레임에 맞추세요…', camErr: '카메라를 열 수 없습니다. 브라우저에서 카메라를 허용하거나 아래에 바코드를 입력하세요.', stop: '스캔 중지',
     manualPh: '또는 바코드 번호 입력', lookup: '조회', badCode: '바코드가 올바르지 않습니다 (8–14자리)',
     found: '인식 완료', many: '여러 제품에 같은 바코드가 있습니다. 맞는 제품을 선택하세요:', unknown: '새 바코드입니다. 제품을 선택하세요 (다음부터 자동 인식):', rescan: '다시 스캔', change: '제품 변경',
@@ -147,10 +147,10 @@ const I18N = {
     back: '뒤로', sku: 'SKU (규격)', skuAuto: '바코드로 자동 인식', chooseSku: 'SKU 선택…', skuOther: '기타 SKU (직접 입력)…', skuPh: '예: 33g, Normal',
     secProduct: '제품', secDate: '날짜', mfd: '제조일', buyDate: '구매일', secPhoto: '샘플 사진', shot: '샘플 사진 촬영', shotHint: '앞면 + 제조일 인쇄 부분 · 최대 3장', delPhoto: '사진 삭제',
     ageBad: '제조일이 구매일보다 늦습니다. 확인하세요', age: d => `제품 나이 ${d}일`,
-    missing: '미입력: ', ready: '저장 준비 완료', save: '샘플 저장', saving: '저장 중…', m_prod: '제품', m_market: '시장', m_mfd: '제조일', m_buy: '구매일', m_photo: '사진',
+    missing: '미입력: ', ready: '저장 준비 완료', save: '샘플 저장', saving: '저장 중…', m_prod: '제품', m_market: '구매처', m_fac: '공장', m_mfd: '제조일', m_buy: '구매일', m_photo: '사진',
     doneHead: '저장 완료. 샘플 코드 (포장에 기재):', next: '다음 샘플 스캔', queued: '시스템으로 전송 중입니다. 몇 초 후 코드가 표시됩니다. 바로 다음 샘플을 스캔해도 됩니다.', sending: '전송 중…', failed: '오류', recent: '최근 등록', saveErr: '저장 실패: ',
     loadErr: e => `목록을 불러오지 못했습니다: ${e}. 네트워크 확인 후 새로고침하세요.`, loading: '목록을 불러오는 중…', learned: '새 바코드를 기억했습니다',
-    opt: { Other: '기타', North: '북부', South: '남부', ORION: 'ORION', 'Đối thủ': '경쟁사' },
+    opt: { Other: '기타', North: '북부 (Miền Bắc)', South: '남부 (Miền Nam)', ORION: 'ORION', 'Đối thủ': '경쟁사' },
   },
 };
 let lang = (() => { try { return localStorage.getItem('mqm1a-lang') === 'ko' ? 'ko' : 'vi'; } catch (e) { return 'vi'; } })();
@@ -167,10 +167,12 @@ const api = {
   get: q => fetch(`${API}?api=${q}&k=${KEY}`, { credentials: 'omit' }).then(r => r.json()),
   post: (name, data) => fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ api: name, k: KEY, data }) }).then(r => r.json()),
 };
-// Người mua: lưu trên máy (tên, bộ phận). Thị trường chọn theo từng mẫu, gợi sẵn thị trường của mẫu trước
+// Người mua: lưu trên máy (tên, bộ phận). Nơi mua (mã North / South, hiện Miền Bắc / Miền Nam) và nhà máy chọn theo từng mẫu, gợi sẵn theo mẫu trước
+const FACTORIES = ['Yên Phong', 'Mỹ Phước'];
 let me = (() => { try { return JSON.parse(localStorage.getItem('mqm1a-scan-me')) || null; } catch (e) { return null; } })();
 const saveMe = v => { me = v; try { localStorage.setItem('mqm1a-scan-me', JSON.stringify(v)); } catch (e) {} };
 let lastMarket = (() => { try { return localStorage.getItem('mqm1a-scan-market') || ''; } catch (e) { return ''; } })();
+let lastFac = (() => { try { return localStorage.getItem('mqm1a-scan-fac') || ''; } catch (e) { return ''; } })();
 let draft = { name: me ? me.name : '', dept: me ? me.dept : '', deptOther: me ? me.deptOther || '' : '' };
 
 let products = [], staticCodes = {}, learnedCodes = {}, loaded = false, loadErr = '', view = me ? 'scan' : 'setup', recent = [];
@@ -202,7 +204,7 @@ function onCode(code) {
   if (!validCode(code)) { toast(T('badCode')); return; }
   stopScan();
   const r = lookup(code);
-  cur = { barcode: code, cands: r.cands, pick: r.cands.length === 1 ? 0 : -1, learn: r.cands.length !== 1, market: lastMarket, origin: 'ORION', brand: '', flavor: '', flavorOther: '', sku: '', skuOther: '', mfd: '', buyDate: today(), photos: [] };
+  cur = { barcode: code, cands: r.cands, pick: r.cands.length === 1 ? 0 : -1, learn: r.cands.length !== 1, market: lastMarket, fac: lastFac, origin: 'ORION', brand: '', flavor: '', flavorOther: '', sku: '', skuOther: '', mfd: '', buyDate: today(), photos: [] };
   if (r.cands.length === 1) applyCand(0);
   if (navigator.vibrate) navigator.vibrate(60);
   view = 'form'; render(); scrollTo(0, 0);
@@ -292,10 +294,12 @@ function skuField() {
   return skus.length ? `<select data-k="sku" ${cur.brand ? '' : 'disabled'}><option value="">${T('chooseSku')}</option>${skus.map(x => opt(x, x, cur.sku)).join('')}${opt(OTHER, T('skuOther'), cur.sku)}</select>${cur.sku === OTHER ? `<input class="mt8" data-k="skuOther" placeholder="${esc(T('skuPh'))}" value="${esc(cur.skuOther)}">` : ''}`
     : `<input data-k="skuOther" placeholder="${esc(T('skuPh'))}" value="${esc(cur.skuOther)}" ${cur.brand ? '' : 'disabled'}>`;
 }
-// Sau khi quét: 1 Sản phẩm · 2 SKU · 3 Thị trường · 4 Ngày (NSX / ngày mua) · 5 Ảnh
+// Sau khi quét: Sản phẩm · SKU · Nơi mua · Nhà máy (chỉ ORION) · Ngày (NSX / ngày mua) · Ảnh
 function viewForm() {
   const ok = cur.pick >= 0 && !cur.editing, comp = cur.origin !== 'ORION';
-  const sec = (n, title, body, req) => `<section class="card"><h2><span class="n">${n}</span>${title}${req ? ' <span class="req" style="color:var(--red)">*</span>' : ''}</h2>${body}</section>`;
+  // Đánh số mục liên tục (mẫu đối thủ không có mục nhà máy)
+  let no = 0;
+  const sec = (title, body, req) => `<section class="card"><h2><span class="n">${++no}</span>${title}${req ? ' <span class="req" style="color:var(--red)">*</span>' : ''}</h2>${body}</section>`;
   const card = ok ? `<div class="prod"><div class="ic">✓</div><div class="pt"><span class="tag ${comp ? 'comp' : ''}">${esc(optL(cur.origin))}</span><b>${esc(cur.brand)} · ${esc(flavorVal())}</b><small>${esc(cur.barcode)}</small></div></div>
       <div style="display:flex;gap:8px;margin-top:10px"><button class="btn ghost sm" id="rescan">${T('rescan')}</button><button class="btn ghost sm" id="change">${T('change')}</button></div>` : '';
   const cands = cur.cands.length > 1 && !ok ? `<p class="hint" style="margin:0 0 8px">${T('many')}</p><div class="cands">${cur.cands.map((x, i) => `<button class="cand ${cur.pick === i ? 'on' : ''}" data-cand="${i}"><b>${esc(x.brand)} · ${esc(x.flavor)}</b><br><small>SKU ${esc(x.sku)}</small></button>`).join('')}</div>` : '';
@@ -306,8 +310,9 @@ function viewForm() {
       <label class="drow"><span>${T('mfd')} <span class="req">*</span></span><b class="dval ${cur.mfd ? '' : 'ph'}">${cur.mfd ? dmy(cur.mfd) : 'DD/MM/YYYY'}</b><input type="date" data-k="mfd" value="${esc(cur.mfd)}" max="${esc(cur.buyDate || today())}"></label>
       <label class="drow"><span>${T('buyDate')} <span class="req">*</span></span><b class="dval ${cur.buyDate ? '' : 'ph'}">${cur.buyDate ? dmy(cur.buyDate) : 'DD/MM/YYYY'}</b><input type="date" data-k="buyDate" value="${esc(cur.buyDate)}" max="${today()}"></label></div>
       <div id="age">${ageInfo()}</div>`;
-  return sec(1, T('secProduct'), card + cands + unknown) + sec(2, T('sku'), sku) + sec(3, T('market'), market, true) + sec(4, T('secDate'), dates, true)
-    + `<section class="card"><h2><span class="n">5</span>${T('secPhoto')} <span class="req" style="color:var(--red)">*</span></h2>
+  const fac = `<div class="seg" id="fc">${FACTORIES.map(f => `<button class="${cur.fac === f ? 'on' : ''}" data-v="${f}">${esc(f)}</button>`).join('')}</div>`;
+  return sec(T('secProduct'), card + cands + unknown) + sec(T('sku'), sku) + sec(T('market'), market, true) + (comp ? '' : sec(T('fac'), fac, true)) + sec(T('secDate'), dates, true)
+    + `<section class="card"><h2><span class="n">${++no}</span>${T('secPhoto')} <span class="req" style="color:var(--red)">*</span></h2>
       ${cur.photos.length < 3 ? `<button class="shot" id="shot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>${T('shot')}<small>${T('shotHint')}</small></button>` : ''}
       <div class="photos">${cur.photos.map((p, i) => `<div style="background-image:url(${p})"><button data-del="${i}" aria-label="${T('delPhoto')}">×</button></div>`).join('')}</div></section>`;
 }
@@ -316,6 +321,7 @@ function missing() {
   const m = [];
   if (!cur.brand || !flavorVal()) m.push(T('m_prod'));
   if (!cur.market) m.push(T('m_market'));
+  if (cur.origin === 'ORION' && !cur.fac) m.push(T('m_fac'));
   if (!cur.mfd) m.push(T('m_mfd'));
   if (!cur.buyDate) m.push(T('m_buy'));
   if (!cur.photos.length) m.push(T('m_photo'));
@@ -359,6 +365,7 @@ function bind() {
   document.querySelectorAll('[data-cand]').forEach(b => b.onclick = () => { applyCand(+b.dataset.cand); cur.learn = true; render(); });
   const rs = $('#rescan'); if (rs) rs.onclick = () => { cur = null; view = 'scan'; render(); startScan(); };
   document.querySelectorAll('#mk button').forEach(b => b.onclick = () => { cur.market = b.dataset.v; render(); });
+  document.querySelectorAll('#fc button').forEach(b => b.onclick = () => { cur.fac = b.dataset.v; render(); });
   const ch = $('#change'); if (ch) ch.onclick = () => { cur.editing = true; cur.learn = true; render(); };
   document.querySelectorAll('#app [data-k]').forEach(el => {
     const k = el.dataset.k;
@@ -413,11 +420,12 @@ window.addEventListener('online', pump);
 window.addEventListener('beforeunload', e => { if (outbox.length) { e.preventDefault(); e.returnValue = ''; } });
 $('#save').onclick = async () => {
   if (missing().length) return;
-  const data = { buyerName: me.name, buyerDept: me.dept, buyerOther: me.deptOther, market: cur.market, buyDate: cur.buyDate, origin: cur.origin, brand: cur.brand, flavor: flavorVal(), sku: skuVal(),
+  const data = { buyerName: me.name, buyerDept: me.dept, buyerOther: me.deptOther, market: cur.market, fac: cur.origin === 'ORION' ? cur.fac : '', buyDate: cur.buyDate, origin: cur.origin, brand: cur.brand, flavor: flavorVal(), sku: skuVal(),
     cat: cur.cat || catOf(cur.brand, flavorVal()), barcode: cur.barcode, learn: !!cur.learn, mfd: cur.mfd, qty: 1, photosFull: cur.photos, thumb: cur.photos[0] ? await shrink(cur.photos[0], 320, 0.6) : '' };
   const tmp = 't' + Date.now();
   outbox.push({ tmp, data }); saveOutbox();
   lastMarket = data.market; try { localStorage.setItem('mqm1a-scan-market', lastMarket); } catch (e) {}
+  if (data.fac) { lastFac = data.fac; try { localStorage.setItem('mqm1a-scan-fac', lastFac); } catch (e) {} }
   if (data.learn) learnedCodes[data.barcode] = { origin: data.origin, brand: data.brand, flavor: data.flavor, sku: data.sku, cat: data.cat };
   const r = { tmp, brand: data.brand, flavor: data.flavor, sku: data.sku, thumb: data.thumb, state: 'wait' };
   recent.unshift(r); showDone(r); $('#done').classList.add('on');
